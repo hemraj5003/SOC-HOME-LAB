@@ -6,10 +6,8 @@ This project demonstrates the implementation of a Security Operations Center (SO
 
 The lab environment consists of three machines:
 
-Ubuntu Server – Wazuh Manager (SIEM)
-
-Windows Host Machine – Endpoint monitored using Wazuh Agent
-
-Kali Linux – Attacker machine used to simulate adversarial activity
+# Ubuntu Server – Wazuh Manager (SIEM)
+# Windows Host Machine – Endpoint monitored using Wazuh Agent
+# Kali Linux – Attacker machine used to simulate adversarial activity
 
 The objective of this project is to simulate attacker behavior and analyze how a SIEM platform collects, processes, and detects security events.
