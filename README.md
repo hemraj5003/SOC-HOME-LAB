@@ -40,6 +40,7 @@ Wazuh Installation
 The Wazuh manager was installed on the Ubuntu server using the official installation script.
 
 curl -sO https://packages.wazuh.com/4.14/wazuh-install.sh
+
 sudo bash wazuh-install.sh -a
 
 After installation, the Wazuh dashboard became available . 
