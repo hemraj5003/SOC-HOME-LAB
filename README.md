@@ -119,7 +119,7 @@ After discovering that **port 445 (SMB)** was open on the Windows machine, I att
 ### Listing SMB Shares
 
 ```
-smbclient -L //<target-ip> -p 445 -U username
+smbclient -L //10.36.140.137 -p 445 -U labuser
 ```
 
 This command lists the available **SMB shares** on the target system.
