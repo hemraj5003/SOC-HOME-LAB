@@ -40,6 +40,7 @@ Once the lab was ready, I tested some basic attack activities from Kali Linux.
 ---- >>> Network Discovery (ARP Scan)
 
 First, I performed an ARP scan to discover live devices on the local network.
+
  ------#### arp-scan --localnet
 
 This helps identify active hosts in the network before performing deeper reconnaissance.
@@ -47,10 +48,12 @@ This helps identify active hosts in the network before performing deeper reconna
 ---- >>> Network Scanning
 After identifying the target system, I used Nmap to scan for open ports.
 Basic SYN scan:
+
   ------#### nmap -sS <target-ip>
 
 ---- >>> Full Port Scan
 To discover all open ports on the target machine, I performed a full port scan.
+
 ------#### nmap -sS -p- <target-ip>
  This scan checks all 65,535 ports, which helps identify services that may not appear in a basic scan.
 
@@ -60,22 +63,26 @@ This simulates reconnaissance by discovering open ports.
 
 After discovering that port 445 (SMB) was open on the Windows machine, I attempted to enumerate and access the SMB shares from Kali Linux.
 First, I checked the available shares using smbclient.
+
  ------#### smbclient -L //<target-ip> -p 445 -U username
  This command lists the available SMB shares on the target system.
 
 At first, I tried using fake credentials, which resulted in authentication failures. These failed login attempts were recorded by the Windows system and were visible in the Wazuh dashboard as authentication errors.
 
 After that, I attempted the connection again using valid credentials.
+
 ------####  smbclient //<target-ip>/C$ -p 445 -U username
  Once authenticated successfully, I was able to see the shared resources such as C drive and D drive.
 
 However, the connection closed shortly after, which also generated events in the system logs. Observing these events helped me understand how authentication attempts and SMB access activities appear in monitoring tools like Wazuh.
 
 --- >>> DoS Simulation
+
  ------####   hping3 --flood -S <target-ip>
  This helped generate unusual network activity and observe alerts in Wazuh.
 
 What I Learned ? 
+
 -- > Building this SOC home lab helped me understand:
      Basic SOC architecture
      How SIEM tools collect logs
