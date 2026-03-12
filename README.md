@@ -1,100 +1,190 @@
-Introduction
+# SOC Home Lab – Attack Simulation & Monitoring with Wazuh
 
-For understanding how real attacks happen and how defenders detect them, I decided to design my own SOC home lab. My goal was simple: understand how security architecture works, how attackers try to access systems, and how monitoring tools detect suspicious activity.
+## Introduction
 
-When I started learning cybersecurity, I had many questions. Watching tutorials helped, but I realized the best way to learn was by building something myself. That’s why I decided to create a small lab environment where I could simulate attacks and monitor them.
+To understand how real cyber attacks occur and how defenders detect them, I designed my own **SOC (Security Operations Center) home lab**.
+My goal was simple: understand **security architecture, attacker techniques, and how monitoring tools detect suspicious activity**.
 
-Lab Setup
+When I first started learning cybersecurity, I had many questions. Watching tutorials helped, but I realized the best way to truly understand security was by **building and experimenting myself**.
 
-I created a small environment using three systems:
+So I created a small lab environment where I could **simulate attacks and observe how defensive tools detect them**.
 
-Kali Linux – attacker machine
-Windows – victim system with Wazuh agent
-Ubuntu Server – Wazuh manager and dashboard
+---
 
-Architecture of the lab:
+# Lab Setup
 
-Kali Linux (Attacker) -- >  Attack Simulation
-Windows Host (Wazuh Agent) -- > Security Logs
-Ubuntu Server (Wazuh Manager) --> Wazuh Dashboard
+The lab environment consists of **three machines**:
 
-In this setup, Kali performs attack simulations, Windows generates logs, and Ubuntu collects and analyzes those logs using Wazuh SIEM.
+ System             Role                           
+ **Kali Linux**    | Attacker machine               
+ **Windows**       | Victim system with Wazuh Agent 
+**Ubuntu Server** | Wazuh Manager + Dashboard      
 
- ---- >>> Network Configuration
- 
-I configured the network like this:
-Ubuntu Server – NAT network (Wazuh manager)
-Windows – Bridged network
-Kali Linux – Bridged network
-This allows Kali and Windows to communicate directly while Ubuntu receives logs from the Windows Wazuh agent.
+### Architecture
 
- ---- >>> Installing Wazuh
- 
-Wazuh was installed on the Ubuntu server using the official installation script.
+```
+Kali Linux (Attacker)  --->  Attack Simulation
+
+Windows Host (Wazuh Agent)  --->  Security Logs
+
+Ubuntu Server (Wazuh Manager)  --->  Wazuh Dashboard
+```
+
+In this setup:
+
+* **Kali Linux** performs attack simulations
+* **Windows** generates system and security logs
+* **Ubuntu Server** collects and analyzes logs using **Wazuh SIEM**
+
+---
+
+# Network Configuration
+
+The virtual network was configured as follows:
+
+| Machine           | Network Type    |
+| ----------------- | --------------- |
+| **Ubuntu Server** | NAT Network     |
+| **Windows**       | Bridged Network |
+| **Kali Linux**    | Bridged Network |
+
+This configuration allows:
+
+* Kali and Windows to **communicate directly**
+* Ubuntu to **collect logs from the Windows Wazuh agent**
+
+---
+
+# Installing Wazuh
+
+Wazuh was installed on the Ubuntu server using the **official installation script**.
+
+```
 curl -sO https://packages.wazuh.com/4.14/wazuh-install.sh
 sudo bash wazuh-install.sh -a
+```
 
-After installation, the Wazuh dashboard became accessible through the browser where security alerts and logs can be monitored.
+After installation, the **Wazuh dashboard** became accessible through the browser where security alerts and logs can be monitored.
 
-Attack Simulation
-Once the lab was ready, I tested some basic attack activities from Kali Linux.
+---
 
----- >>> Network Discovery (ARP Scan)
-First, I performed an ARP scan to discover live devices on the local network.
+# Attack Simulation
 
- ------#### arp-scan --localnet
+Once the lab environment was ready, I simulated several attack activities from **Kali Linux**.
 
-This helps identify active hosts in the network before performing deeper reconnaissance.
+---
 
----- >>> Network Scanning
-After identifying the target system, I used Nmap to scan for open ports.
-Basic SYN scan:
-                                  ------#### nmap -sS <target-ip>
+## Network Discovery (ARP Scan)
 
----- >>> Full Port Scan
+First, I performed an **ARP scan** to discover live devices on the local network.
 
-To discover all open ports on the target machine, I performed a full port scan.
-                              ------#### nmap -sS -p- <target-ip>
-                              
-This scan checks all 65,535 ports, which helps identify services that may not appear in a basic scan.
-This simulates reconnaissance by discovering open ports.
+```
+arp-scan --localnet
+```
 
----- >>>  SMB Enumeration and Access
+This helps identify active hosts before performing deeper reconnaissance.
 
-After discovering that port 445 (SMB) was open on the Windows machine, I attempted to enumerate and access the SMB shares from Kali Linux.
-First, I checked the available shares using smbclient.
-                              ------#### smbclient -L //<target-ip> -p 445 -U username
- 
- This command lists the available SMB shares on the target system.
+---
 
-At first, I tried using fake credentials, which resulted in authentication failures. These failed login attempts were recorded by the Windows system and were visible in the Wazuh dashboard as authentication errors.
+## Network Scanning
 
-After that, I attempted the connection again using valid credentials.
-                                  ------####  smbclient //<target-ip>/C$ -p 445 -U username
+After identifying the target system, I performed **port scanning using Nmap**.
 
- Once authenticated successfully, I was able to see the shared resources such as C drive and D drive.
+### Basic SYN Scan
 
-However, the connection closed shortly after, which also generated events in the system logs. Observing these events helped me understand how authentication attempts and SMB access activities appear in monitoring tools like Wazuh.
+```
+nmap -sS <target-ip>
+```
 
---- >>> DoS Simulation
-                                   ------####   hping3 --flood -S <target-ip>
- This helped generate unusual network activity and observe alerts in Wazuh.
+This scan identifies **open ports and running services** on the target machine.
 
-What I Learned ? 
+---
 
--- > Building this SOC home lab helped me understand:
-     > Basic SOC architecture
-     > How SIEM tools collect logs
-     > How attack activities generate security events
-     > How monitoring tools detect suspicious behavior
+## Full Port Scan
 
-Even though this is a simple setup, it helped me understand both attacker behavior and defensive monitoring.
+To discover all open ports on the target machine:
 
-Future Plans
-In the future, I plan to improve this lab by adding:
+```
+nmap -sS -p- <target-ip>
+```
 
--> pfSense firewall
--> More attack simulations
--> Additional monitoring techniques (AI for security)
+This scans **all 65,535 ports** and helps identify services that may not appear in basic scans.
 
-This project helped me move from theory to practical learning.
+---
+
+## SMB Enumeration and Access
+
+After discovering that **port 445 (SMB)** was open on the Windows machine, I attempted to enumerate SMB shares.
+
+### Listing SMB Shares
+
+```
+smbclient -L //<target-ip> -p 445 -U username
+```
+
+This command lists the available **SMB shares** on the target system.
+
+At first, I tried using **invalid credentials**, which resulted in authentication failures.
+
+These failed login attempts were **logged by Windows and detected by Wazuh**, appearing as authentication errors in the dashboard.
+
+---
+
+### Accessing SMB Share
+
+Afterward, I attempted access using valid credentials:
+
+```
+smbclient //<target-ip>/C$ -p 445 -U username
+```
+
+Once authenticated successfully, I could see shared resources such as:
+
+* C Drive
+* D Drive
+
+The connection closed shortly afterward, which also generated system log events.
+
+Observing these events helped me understand **how authentication attempts and SMB activity appear in monitoring tools like Wazuh**.
+
+---
+
+## DoS Simulation
+
+To simulate abnormal network activity, I performed a **DoS flood test**:
+
+```
+hping3 --flood -S <target-ip>
+```
+
+This generated unusual traffic, allowing me to observe how **Wazuh detects abnormal network behavior**.
+
+---
+
+# What I Learned
+
+Building this SOC home lab helped me understand:
+
+* SOC architecture and monitoring workflows
+* How SIEM tools collect and analyze logs
+* How attacker activities generate security events
+* How monitoring tools detect suspicious behavior
+
+Even though this is a simple setup, it helped me understand **both attacker behavior and defensive monitoring techniques**.
+
+---
+
+# Future Improvements
+
+In the future, I plan to expand this lab by adding:
+
+* **pfSense firewall**
+* **More attack simulations**
+* **Advanced monitoring techniques**
+* **AI-based security analytics**
+
+---
+
+# Conclusion
+
+This project helped me move from **theoretical cybersecurity knowledge to practical hands-on learning** by simulating attacks and observing how security monitoring systems respond.
