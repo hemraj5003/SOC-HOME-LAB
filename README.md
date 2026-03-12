@@ -93,7 +93,7 @@ After identifying the target system, I performed **port scanning using Nmap**.
 ### Basic SYN Scan
 
 ```
-nmap -sS <target-ip>
+nmap -sS 10.36.140.137
 ```
 
 This scan identifies **open ports and running services** on the target machine.
@@ -105,7 +105,7 @@ This scan identifies **open ports and running services** on the target machine.
 To discover all open ports on the target machine:
 
 ```
-nmap -sS -p- <target-ip>
+nmap -sS -p- 10.36.140.137
 ```
 
 This scans **all 65,535 ports** and helps identify services that may not appear in basic scans.
@@ -135,7 +135,7 @@ These failed login attempts were **logged by Windows and detected by Wazuh**, ap
 Afterward, I attempted access using valid credentials:
 
 ```
-smbclient //<target-ip>/C$ -p 445 -U username
+smbclient 10.36.140.137 -p 445 -U labuser
 ```
 
 Once authenticated successfully, I could see shared resources such as:
@@ -154,7 +154,7 @@ Observing these events helped me understand **how authentication attempts and SM
 To simulate abnormal network activity, I performed a **DoS flood test**:
 
 ```
-hping3 --flood -S <target-ip>
+hping3 --flood -S 10.36.140.137
 ```
 
 This generated unusual traffic, allowing me to observe how **Wazuh detects abnormal network behavior**.
